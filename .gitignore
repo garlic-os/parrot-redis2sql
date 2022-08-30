@@ -147,6 +147,7 @@ cython_debug/
 *.sqlite3-wal
 *.sqlite3-shm
 *.rdb
+*.pid
 
 # Configuration files
 config.py
