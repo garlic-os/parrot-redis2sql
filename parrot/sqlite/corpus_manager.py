@@ -1,10 +1,10 @@
 from typing import List, Union, cast
-from utils.types import CorpusManagerInterface
+# from utils.types import CorpusManagerInterface
 from discord import Message
-from exceptions import NoDataError, NotRegisteredError
+# from exceptions import Exception, NotRegisteredError
 
 
-class CorpusManager(CorpusManagerInterface):
+class CorpusManager:
     def __init__(self, db):
         self.db = db
 
@@ -47,15 +47,15 @@ class CorpusManager(CorpusManagerInterface):
         return res.fetchone()[0]
 
 
-    def get(self, user: int) -> List[str]:
+    def get(self, user_id: int) -> List[str]:
         """ Get a corpus from the local database by user ID. """
         # self.assert_registered(user)
         res = self.db.execute(
-            "SELECT content FROM messages WHERE user_id = ?", (userIid,)
+            "SELECT content FROM messages WHERE user_id = ?", (user_id,)
         )
         corpus = [row[0] for row in res]
         if len(corpus) == 0:
-            raise NoDataError(f"No data available for user with ID {user_id}.")
+            raise Exception(f"No data available for user with ID {user_id}.")
         return corpus
 
 
@@ -67,7 +67,7 @@ class CorpusManager(CorpusManagerInterface):
         res = self.db.execute("SELECT CHANGES()")
         num_deleted = res.fetchone()[0]
         if num_deleted == 0:
-            raise NoDataError(f"No data available for user with ID {user_id}.")
+            raise Exception(f"No data available for user with ID {user_id}.")
 
 
     def delete_message(self, message_id: int) -> None:
@@ -78,7 +78,7 @@ class CorpusManager(CorpusManagerInterface):
         res = self.db.execute("SELECT CHANGES()")
         num_deleted = res.fetchone()[0]
         if num_deleted == 0:
-            raise NoDataError(f"Message with ID {message_id} did not exist in the first place.")
+            raise Exception(f"Message with ID {message_id} did not exist in the first place.")
 
 
     def has(self, user_id: int) -> bool:

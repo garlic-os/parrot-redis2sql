@@ -1,11 +1,14 @@
-import os
 import sqlite3
 from redis import Redis
 from tqdm import tqdm
 import json
 
 import config
-import parrot
+from parrot.redis.avatar_manager import AvatarManager as RedisAvatarManager
+from parrot.redis.corpus_manager import CorpusManager as RedisCorpusManager
+from parrot.redis.redis_set import RedisSet
+from parrot.sqlite.avatar_manager import AvatarManager as SqliteAvatarManager
+from parrot.sqlite.corpus_manager import CorpusManager as SqliteCorpusManager
 
 print("Logging into the Redis database...")
 redis = Redis(
@@ -16,7 +19,7 @@ redis = Redis(
 )
 
 print("Connecting to the sqlite database...")
-con = sqlite3.connect(os.path.join("database", "parrot.sqlite3"))
+con = sqlite3.connect("parrot.sqlite3")
 con.isolation_level = None  # autocommit mode
 
 
@@ -49,13 +52,12 @@ con.executescript("""
 
 
 print("Instantiating data structures...")
-redis_corpora = parrot.redis.corpus_manager.CorpusManager(redis)
-sqlite_corpora = parrot.sqlite.corpus_manager.CorpusManager(con)
-redis_avatars = parrot.redis.avatar_manager.AvatarManager(redis)
-sqlite_avatars = parrot.sqlite.avatar_manager.AvatarManager(con)
-redis_registered_users = parrot.redis.redis_set.RedisSet(redis, "registered_users")
-redis_learning_channels = parrot.redis.redis_set.RedisSet(redis, "learning_channels")
-redis_speaking_channels = parrot.redis.redis_set.RedisSet(redis, "speaking_channels")
+redis_corpora = RedisCorpusManager(redis)
+sqlite_corpora = SqliteCorpusManager(con)
+redis_avatars = RedisAvatarManager(redis)
+redis_registered_users = RedisSet(redis, "registered_users")
+redis_learning_channels = RedisSet(redis, "learning_channels")
+redis_speaking_channels = RedisSet(redis, "speaking_channels")
 
 print("Collecting corpus keys...", end="")
 corpus_keys = redis.keys("corpus:*")

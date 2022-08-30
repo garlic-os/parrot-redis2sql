@@ -1,10 +1,10 @@
-from typing import List, Union, cast
-from utils.types import CorpusManagerInterface, ParrotInterface
-from discord import User, Member, Message
-from exceptions import NoDataError, NotRegisteredError
+from typing import List, cast
+# from utils.types import CorpusManagerInterface
+# from discord import User, Member, Message
+# from exceptions import NoDataError, NotRegisteredError
 
 
-class CorpusManager(CorpusManagerInterface):
+class CorpusManager:
     def __init__(self, redis):
         self.redis = redis
 
@@ -40,7 +40,7 @@ class CorpusManager(CorpusManagerInterface):
         # self.assert_registered(user)
         corpus = cast(List[str], self.redis.hvals(f"corpus:{user_id}"))
         if len(corpus) == 0:
-            raise NoDataError(f"No data available for user with ID {user_id}.")
+            raise Exception(f"No data available for user with ID {user_id}.")
         return corpus
 
     # def delete(self, user: Union[User, Member]) -> None:
@@ -55,12 +55,12 @@ class CorpusManager(CorpusManagerInterface):
     #     if num_deleted == 0:
     #         raise NoDataError(f"No data available for user {user}.")
 
-    def has(self, user: object) -> bool:
-        """ Check if a user's corpus is present on the source of truth. """
-        return (
-            (isinstance(user, User) or isinstance(user, Member)) and
-            bool(self.redis.exists(f"corpus:{user.id}"))
-        )
+    # def has(self, user: object) -> bool:
+    #     """ Check if a user's corpus is present on the source of truth. """
+    #     return (
+    #         (isinstance(user, User) or isinstance(user, Member)) and
+    #         bool(self.redis.exists(f"corpus:{user.id}"))
+    #     )
 
     # def assert_registered(self, user: Union[User, Member]) -> None:
     #     if not user.bot and user.id not in self.bot.registered_users:
