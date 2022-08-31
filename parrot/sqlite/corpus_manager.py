@@ -28,12 +28,12 @@ class CorpusManager:
         # Also learn from text inside embeds, if the user is a bot.
         # If it's not from a bot, it's probably just YouTube descriptions and
         # not worth learning from.
-        for message in messages:
-            if message.author.bot:
-                for embed in message.embeds:
-                    desc = embed.description
-                    if isinstance(desc, str):
-                        message.content += "\n" + desc
+        # for message in messages:
+        #     if message.author.bot:
+        #         for embed in message.embeds:
+        #             desc = embed.description
+        #             if isinstance(desc, str):
+        #                 message.content += "\n" + desc
 
         self.db.execute("""
             INSERT INTO messages (id, user_id, timestamp, content)
