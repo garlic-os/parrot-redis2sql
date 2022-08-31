@@ -1,13 +1,14 @@
+from typing import Dict
 import sqlite3
 from redis import Redis
 from tqdm import tqdm
 import json
+from discord import Message
 
 import config
 from parrot.redis.avatar_manager import AvatarManager as RedisAvatarManager
 from parrot.redis.corpus_manager import CorpusManager as RedisCorpusManager
 from parrot.redis.redis_set import RedisSet
-from parrot.sqlite.avatar_manager import AvatarManager as SqliteAvatarManager
 from parrot.sqlite.corpus_manager import CorpusManager as SqliteCorpusManager
 
 print("Logging into the Redis database...")
@@ -68,8 +69,15 @@ for user_id in tqdm(redis_registered_users, "User registration"):
 
 for key in tqdm(corpus_keys, "Corpora"):
     user_id = int(key.split(":")[1])
-    corpus = redis_corpora.get(user_id)  # type: list[discord.Message]
-    sqlite_corpora.add(user_id, corpus)
+    corpus: Dict[int, str] = redis.hgetall(f"corpus:{user_id}")
+    for message_id, content in tqdm(corpus.items(), f"User {user_id}"):
+        # Timestamp was not stored in the old database, but I want it in the new
+        # one, so I'm just going to put 0 for now.
+        con.execute("""
+            INSERT INTO messages (id, user_id, timestamp, content)
+            VALUES (?, ?, ?, ?)""",
+            (message_id, user_id, 0, content)
+        )
 
 for i, thing in enumerate(tqdm(redis.hgetall("avatars"), "Avatars")):
     if i % 2 == 0:
